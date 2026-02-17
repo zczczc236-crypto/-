@@ -3,235 +3,231 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>강화 마스터: 리마스터 (밸런스 패치)</title>
+    <title>강화 마스터: 얼티밋 대규모 업데이트</title>
     <style>
         :root {
-            --bg: #0d1117; --panel: #161b22; --accent: #58a6ff;
-            --gold: #f1c40f; --stone: #a29bfe; --shield: #55efc4; --fever: #ff4757;
-            --success: #2ecc71; --danger: #e74c3c;
+            --bg: #0b0e14; --panel: #1a1f28; --accent: #4a90e2;
+            --gold: #fbc531; --stone: #9c88ff; --shield: #4cd137; --fever: #e84118;
+            --success: #44bd32; --danger: #c23616;
         }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body {
-            margin: 0; background: var(--bg); color: white; font-family: 'Apple SD Gothic Neo', sans-serif;
-            display: flex; justify-content: center; height: 100vh; overflow: hidden;
-        }
-        .app {
-            width: 100%; max-width: 480px; background: var(--panel);
-            display: flex; flex-direction: column; position: relative; border: 1px solid #30363d;
-        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Pretendard', sans-serif; }
+        body { margin: 0; background: var(--bg); color: white; display: flex; justify-content: center; height: 100vh; overflow: hidden; }
+        
+        .app { width: 100%; max-width: 480px; background: var(--panel); display: flex; flex-direction: column; position: relative; border-left: 1px solid #2d3436; border-right: 1px solid #2d3436; }
 
-        /* 리소스바 */
-        .top-bar {
-            display: flex; justify-content: space-around; padding: 15px;
-            background: rgba(0,0,0,0.8); font-weight: bold; font-size: 0.9rem;
-        }
+        /* 로그인 섹션 */
+        #authSection { position: absolute; inset: 0; background: var(--bg); z-index: 1000; display: flex; flex-direction: column; justify-content: center; padding: 40px; }
+        .auth-input { width: 100%; padding: 15px; margin-bottom: 10px; border-radius: 8px; border: 1px solid #353b48; background: #2f3640; color: white; outline: none; }
+        .btn-auth { width: 100%; padding: 15px; background: var(--accent); border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer; }
+
+        /* 상단 바 */
+        .top-bar { display: flex; justify-content: space-around; padding: 15px; background: rgba(0,0,0,0.8); font-weight: bold; font-size: 0.85rem; }
+        .user-name { position: absolute; top: 60px; left: 15px; font-size: 0.7rem; color: #7f8c8d; }
 
         /* 메인 무대 */
-        .stage {
-            flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            position: relative; overflow: hidden;
-        }
-        .visual-obj { font-size: 100px; z-index: 2; transition: transform 0.1s; }
-        .aura { position: absolute; width: 250px; height: 250px; border-radius: 50%; filter: blur(60px); opacity: 0; z-index: 1; transition: 0.5s; }
+        .stage { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
+        .visual-obj { font-size: 110px; z-index: 2; transition: transform 0.1s; filter: drop-shadow(0 0 15px rgba(255,255,255,0.1)); }
+        .aura { position: absolute; width: 260px; height: 260px; border-radius: 50%; filter: blur(60px); opacity: 0; z-index: 1; transition: 0.6s; }
 
         /* 정보창 */
         .info-area { text-align: center; width: 100%; padding: 0 20px; z-index: 3; }
-        .lvl-badge { font-size: 2rem; font-weight: bold; margin: 10px 0; color: white; }
-        .price-tag { color: var(--success); font-weight: bold; font-size: 1.1rem; margin-bottom: 10px; }
-        
-        .fever-container { width: 100%; height: 8px; background: #30363d; border-radius: 4px; margin: 15px 0; overflow: hidden; }
+        .lvl-badge { font-size: 2.2rem; font-weight: 800; margin: 10px 0; letter-spacing: -1px; }
+        .price-tag { color: var(--gold); font-size: 1.1rem; font-weight: bold; margin-bottom: 5px; }
+        .fever-container { width: 100%; height: 6px; background: #353b48; border-radius: 3px; margin: 15px 0; overflow: hidden; }
         #feverBar { width: 0%; height: 100%; background: var(--fever); transition: 0.3s; }
 
         /* 컨트롤 */
-        .controls {
-            display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; padding: 15px;
-            background: rgba(0,0,0,0.5); border-top: 1px solid #30363d;
-        }
-        button {
-            border: none; border-radius: 12px; padding: 15px 5px; font-weight: bold;
-            cursor: pointer; color: white; background: #21262d; font-size: 0.9rem;
-        }
-        .btn-enhance { grid-column: span 3; background: var(--accent); font-size: 1.4rem; padding: 20px; margin-bottom: 5px; }
-        .btn-sell { background: #238636; }
+        .controls { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; padding: 15px; background: rgba(0,0,0,0.5); }
+        button { border: none; border-radius: 12px; padding: 16px 5px; font-weight: bold; cursor: pointer; color: white; background: #2f3640; font-size: 0.85rem; }
+        .btn-enhance { grid-column: span 3; background: linear-gradient(135deg, #4834d4, #686de0); font-size: 1.3rem; margin-bottom: 5px; }
+        .btn-sell { background: #1b8d44; }
         button:active { transform: scale(0.96); }
 
-        /* 상점 모달 */
-        #shopModal {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(13, 17, 23, 0.98); z-index: 100; display: none; flex-direction: column; padding: 30px;
-        }
-        .shop-row { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: #21262d; border-radius: 12px; margin-bottom: 10px; }
+        /* 상점 */
+        #shopModal { position: absolute; inset: 0; background: rgba(11, 14, 20, 0.98); z-index: 100; display: none; flex-direction: column; padding: 25px; }
+        .shop-list { flex: 1; overflow-y: auto; padding-right: 5px; }
+        .shop-row { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: #2f3640; border-radius: 12px; margin-bottom: 8px; }
+        .shop-row button { padding: 10px 15px; background: var(--accent); }
 
-        .log-box { height: 100px; background: #000; padding: 10px; font-size: 0.8rem; overflow-y: auto; color: #8b949e; border-top: 1px solid #30363d; }
-        .shake { animation: shake 0.2s ease-in-out; }
-        @keyframes shake { 0%, 100% { transform: translate(0,0); } 25% { transform: translate(-5px,0); } 75% { transform: translate(5px,0); } }
+        .log-box { height: 90px; background: #000; padding: 10px; font-size: 0.75rem; overflow-y: auto; color: #95a5a6; border-top: 1px solid #353b48; }
+        .shake { animation: shake 0.2s ease; }
+        @keyframes shake { 0%, 100% { transform: translate(0,0); } 25% { transform: translate(-8px,0); } 75% { transform: translate(8px,0); } }
     </style>
 </head>
 <body>
 
 <div class="app">
+    <div id="authSection">
+        <h1 style="text-align:center; color:var(--accent);">강화 마스터</h1>
+        <p style="text-align:center; color:#7f8c8d; font-size:0.9rem;">계정을 생성하거나 로그인하세요.</p>
+        <input type="text" id="username" class="auth-input" placeholder="아이디">
+        <input type="password" id="password" class="auth-input" placeholder="비밀번호">
+        <button class="btn-auth" onclick="handleAuth()">게임 시작</button>
+    </div>
+
     <div class="top-bar">
-        <span>💰 <span id="gold">1000</span></span>
-        <span>💎 <span id="stone">10</span></span>
+        <span>💰 <span id="gold">0</span></span>
+        <span>💎 <span id="stone">0</span></span>
         <span>🛡️ <span id="shield">0</span></span>
     </div>
+    <div class="user-name" id="userDisplayName">사용자: -</div>
 
     <div class="stage" id="stage">
         <div id="aura" class="aura"></div>
         <div id="visual" class="visual-obj">⚔️</div>
         <div class="info-area">
             <div id="lvlName" class="lvl-badge">검 +0</div>
-            <div class="price-tag">현재 판매가: <span id="sellPrice">0</span>G</div>
-            <div id="chanceInfo" style="color:#8b949e; font-size: 0.9rem;">확률: 100% | 비용: 100G</div>
+            <div class="price-tag">예상 판매가: <span id="sellPrice">0</span>G</div>
+            <div id="chanceInfo" style="color:#7f8c8d; font-size: 0.85rem;">확률: 100% | 비용: 100G</div>
             <div class="fever-container"><div id="feverBar"></div></div>
         </div>
     </div>
 
     <div class="controls">
-        <button id="enhanceBtn" class="btn-enhance" onclick="handleEnhance()">강 화 시 도</button>
+        <button class="btn-enhance" onclick="handleEnhance()">강 화 시 도</button>
         <button class="btn-sell" onclick="handleSell()">아이템 판매</button>
         <button onclick="toggleShop(true)">🛒 상점</button>
         <button id="btnAuto" onclick="toggleAuto()">자동: OFF</button>
     </div>
 
-    <div class="log-box" id="logBox">안정적인 대장간에 오신 것을 환영합니다!</div>
+    <div class="log-box" id="logBox">로컬 서버에 연결되었습니다.</div>
 
     <div id="shopModal">
-        <h2 style="text-align:center; color:var(--gold);">강화 상점</h2>
-        <div style="flex:1; overflow-y:auto;">
-            <div class="shop-row"><span>🛡️ 파괴 방지권 (2000G)</span><button onclick="buy('shield', 2000)">구매</button></div>
+        <h2 style="text-align:center; color:var(--gold);">백화점</h2>
+        <div class="shop-list">
+            <div class="shop-row"><span>🛡️ 파괴 방지권 (15,000G)</span><button onclick="buy('shield', 15000)">구매</button></div>
             <div class="shop-row"><span>💎 강화석 x5 (500G)</span><button onclick="buy('stone', 500)">구매</button></div>
+            <h3 style="margin-top:20px; color:var(--accent);">프리미엄 스킨</h3>
             <div id="skinContainer"></div>
         </div>
-        <button onclick="toggleShop(false)" style="background:var(--danger); width:100%; padding:15px; margin-top:10px; border-radius:10px;">닫기</button>
+        <button onclick="toggleShop(false)" style="background:var(--danger); padding:15px; border-radius:10px; margin-top:10px;">상점 나가기</button>
     </div>
 </div>
 
-<audio id="sndSuccess" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>
-<audio id="sndFail" src="https://actions.google.com/sounds/v1/water/splash.ogg"></audio>
-
 <script>
-    let state = {
-        gold: 1000, stone: 10, shield: 0, level: 0,
-        fever: 0, isFever: false, auto: false,
-        skin: { id: 'default', icon: '⚔️', name: '검' },
-        ownedSkins: ['default']
-    };
+    let currentUser = null;
+    let state = { gold: 1000, stone: 10, shield: 0, level: 0, fever: 0, isFever: false, auto: false, skinId: 'default', ownedSkins: ['default'] };
 
     const skins = [
-        { id: 'default', icon: '⚔️', name: '기본 검', price: 0 },
-        { id: 'dog', icon: '🐶', name: '강아지', price: 3000 },
-        { id: 'ship', icon: '🚀', name: '우주선', price: 10000 },
-        { id: 'dragon', icon: '🐲', name: '드래곤', price: 30000 }
+        { id: 'default', icon: '⚔️', name: '녹슨 검', price: 0 },
+        { id: 'wood', icon: '🪵', name: '단단한 목재', price: 2000 },
+        { id: 'dog', icon: '🐶', name: '시바견', price: 5000 },
+        { id: 'cat', icon: '🐱', name: '치즈 고양이', price: 8000 },
+        { id: 'ship', icon: '🚀', name: '탐사용 로켓', price: 20000 },
+        { id: 'alien', icon: '👽', name: '외계 친구', price: 35000 },
+        { id: 'ghost', icon: '👻', name: '꼬마 유령', price: 50000 },
+        { id: 'crown', icon: '👑', name: '왕의 왕관', price: 80000 },
+        { id: 'dragon', icon: '🐲', name: '가디언 드래곤', price: 150000 },
+        { id: 'gem', icon: '💎', name: '무한의 보석', price: 300000 }
     ];
+
+    // 1. 로그인 시스템
+    function handleAuth() {
+        const id = document.getElementById('username').value;
+        const pw = document.getElementById('password').value;
+        if(!id || !pw) return alert("아이디와 비밀번호를 입력하세요.");
+
+        const users = JSON.parse(localStorage.getItem('users') || '{}');
+        if(users[id]) {
+            if(users[id].pw !== pw) return alert("비밀번호가 틀렸습니다.");
+            state = users[id].state;
+        } else {
+            users[id] = { pw: pw, state: state };
+            localStorage.setItem('users', JSON.stringify(users));
+            alert("회원가입 완료! 환영합니다.");
+        }
+        currentUser = id;
+        document.getElementById('authSection').style.display = 'none';
+        document.getElementById('userDisplayName').innerText = `사용자: ${id}`;
+        updateUI();
+    }
+
+    function saveGame() {
+        if(!currentUser) return;
+        const users = JSON.parse(localStorage.getItem('users'));
+        users[currentUser].state = state;
+        localStorage.setItem('users', JSON.stringify(users));
+    }
+
+    // 2. 핵심 강화 로직
+    function handleEnhance() {
+        const cost = 100 + (state.level * 350);
+        if(state.gold < cost || state.stone < 1) { 
+            addLog("골드나 강화석이 부족합니다!"); 
+            state.auto = false; updateUI(); return; 
+        }
+
+        state.gold -= cost; state.stone--;
+        let prob = Math.max(1, 100 - (state.level * 9));
+        if(state.isFever) prob = Math.min(100, prob * 2);
+
+        if(Math.random() * 100 <= prob) {
+            state.level++;
+            state.fever = Math.min(100, state.fever + 10);
+            addLog(`강화 성공! (+${state.level})`, "var(--success)");
+            if(state.fever >= 100 && !state.isFever) startFever();
+        } else {
+            document.getElementById('stage').classList.add('shake');
+            setTimeout(() => document.getElementById('stage').classList.remove('shake'), 200);
+            if(state.level >= 7) {
+                if(state.shield > 0) { state.shield--; addLog("방지권 사용! 파괴 모면.", "var(--accent)"); }
+                else { state.level = 0; state.auto = false; addLog("아이템 파괴!", "var(--danger)"); }
+            } else { addLog("강화 실패!"); }
+        }
+        updateUI(); saveGame();
+    }
+
+    // 3. 판매 밸런스 (강화비 대비 약 1.3배의 누적 가치)
+    function handleSell() {
+        if(state.level === 0) return;
+        const sellPrice = Math.floor(300 * Math.pow(1.85, state.level));
+        state.gold += sellPrice;
+        addLog(`${state.level}강 판매: +${sellPrice.toLocaleString()}G`, "var(--gold)");
+        state.level = 0; updateUI(); saveGame();
+    }
 
     function updateUI() {
         document.getElementById('gold').innerText = Math.floor(state.gold).toLocaleString();
         document.getElementById('stone').innerText = state.stone;
         document.getElementById('shield').innerText = state.shield;
-        document.getElementById('visual').innerText = state.skin.icon;
         
-        // 확률 계산
-        let prob = Math.max(1, 100 - (state.level * 8));
-        if (state.isFever) prob = Math.min(100, prob * 2);
+        const skin = skins.find(s => s.id === state.skinId);
+        document.getElementById('visual').innerText = skin.icon;
+        document.getElementById('lvlName').innerText = `${skin.name} +${state.level}`;
         
-        // 비용 및 판매가 계산 (대폭 상향된 공식)
-        const cost = 100 + (state.level * 250);
-        const sellPrice = state.level === 0 ? 0 : Math.floor(200 * Math.pow(2.1, state.level));
+        const cost = 100 + (state.level * 350);
+        const prob = Math.max(1, 100 - (state.level * 9)) * (state.isFever ? 2 : 1);
+        const sellPrice = state.level === 0 ? 0 : Math.floor(300 * Math.pow(1.85, state.level));
         
-        document.getElementById('lvlName').innerText = `${state.skin.name} +${state.level}`;
         document.getElementById('sellPrice').innerText = sellPrice.toLocaleString();
-        document.getElementById('chanceInfo').innerText = `성공 확률: ${prob}% | 강화비용: ${cost}G`;
+        document.getElementById('chanceInfo').innerText = `확률: ${Math.min(100, prob)}% | 강화비용: ${cost}G`;
         document.getElementById('feverBar').style.width = `${state.fever}%`;
+        document.getElementById('btnAuto').innerText = `자동: ${state.auto ? 'ON' : 'OFF'}`;
 
-        // 아우라 효과
         const aura = document.getElementById('aura');
-        if (state.level >= 10) { aura.style.opacity = 0.7; aura.style.background = "gold"; }
-        else if (state.level >= 5) { aura.style.opacity = 0.5; aura.style.background = "#58a6ff"; }
+        if(state.level >= 15) { aura.style.opacity = 0.8; aura.style.background = "#ff4757"; }
+        else if(state.level >= 10) { aura.style.opacity = 0.6; aura.style.background = "#f1c40f"; }
+        else if(state.level >= 5) { aura.style.opacity = 0.4; aura.style.background = "#58a6ff"; }
         else { aura.style.opacity = 0; }
     }
 
-    function handleEnhance() {
-        const cost = 100 + (state.level * 250);
-        if (state.gold < cost || state.stone < 1) { 
-            addLog("재료 또는 골드가 부족합니다!", "orange"); 
-            state.auto = false; 
-            updateUI();
-            return; 
-        }
-
-        state.gold -= cost; state.stone--;
-        
-        let prob = Math.max(1, 100 - (state.level * 8));
-        if (state.isFever) prob = Math.min(100, prob * 2);
-
-        if (Math.random() * 100 <= prob) {
-            state.level++;
-            state.fever = Math.min(100, state.fever + 10);
-            document.getElementById('sndSuccess').play().catch(()=>{});
-            addLog(`강화 성공! (+${state.level})`, "var(--success)");
-            if (state.fever >= 100 && !state.isFever) startFever();
-        } else {
-            document.getElementById('sndFail').play().catch(()=>{});
-            document.getElementById('stage').classList.add('shake');
-            setTimeout(() => document.getElementById('stage').classList.remove('shake'), 200);
-            
-            if (state.level >= 7) {
-                if (state.shield > 0) {
-                    state.shield--;
-                    addLog("실패! 방지권으로 파괴를 면했습니다.", "var(--accent)");
-                } else {
-                    state.level = 0; // 파괴!
-                    addLog("강화 실패로 아이템이 파괴되었습니다!", "var(--danger)");
-                    state.auto = false;
-                    document.getElementById('btnAuto').innerText = "자동: OFF";
-                }
-            } else {
-                addLog("강화 실패! 다행히 파괴되지는 않았습니다.");
-            }
-        }
-        updateUI();
-    }
-
-    function handleSell() {
-        if (state.level === 0) {
-            addLog("0강 아이템은 팔 수 없습니다.");
-            return;
-        }
-        const sellPrice = Math.floor(200 * Math.pow(2.1, state.level));
-        state.gold += sellPrice;
-        addLog(`${state.level}강 판매 완료! +${sellPrice.toLocaleString()}G 획득`, "var(--gold)");
-        state.level = 0;
-        updateUI();
-    }
-
-    function startFever() {
-        state.isFever = true;
-        document.getElementById('stage').style.background = "radial-gradient(circle, #441111 0%, #0d1117 100%)";
-        addLog("🔥 FEVER TIME! 강화 성공 확률이 2배가 됩니다!", "var(--fever)");
-        setTimeout(() => {
-            state.isFever = false; state.fever = 0;
-            document.getElementById('stage').style.background = "transparent";
-            updateUI();
-        }, 10000);
-    }
-
+    // 4. 상점 및 자동화
     function buy(type, price) {
-        if (state.gold < price) { addLog("골드가 부족합니다."); return; }
+        if(state.gold < price) return addLog("골드 부족!");
         state.gold -= price;
-        if (type === 'stone') state.stone += 5;
+        if(type === 'stone') state.stone += 5;
         else state.shield += 1;
-        updateUI();
+        updateUI(); saveGame();
     }
 
     function toggleShop(show) {
         const m = document.getElementById('shopModal');
         m.style.display = show ? 'flex' : 'none';
-        if (show) {
+        if(show) {
             const cont = document.getElementById('skinContainer');
             cont.innerHTML = skins.map(s => `
                 <div class="shop-row">
-                    <span>${s.icon} ${s.name} (${s.price.toLocaleString()}G)</span>
+                    <span style="font-size:0.9rem;">${s.icon} ${s.name} (${s.price.toLocaleString()}G)</span>
                     <button onclick="buySkin('${s.id}')">${state.ownedSkins.includes(s.id) ? '장착' : '구매'}</button>
                 </div>
             `).join('');
@@ -240,37 +236,31 @@
 
     function buySkin(id) {
         const s = skins.find(x => x.id === id);
-        if (state.ownedSkins.includes(id)) {
-            state.skin = s; addLog(`${s.name} 장착 완료!`);
-        } else {
-            if (state.gold < s.price) { addLog("골드가 부족합니다."); return; }
-            state.gold -= s.price; state.ownedSkins.push(id); state.skin = s;
-            addLog(`${s.name} 구매 및 장착 완료!`);
+        if(state.ownedSkins.includes(id)) { state.skinId = id; }
+        else {
+            if(state.gold < s.price) return addLog("골드 부족!");
+            state.gold -= s.price; state.ownedSkins.push(id); state.skinId = id;
         }
-        toggleShop(false); updateUI();
+        toggleShop(false); updateUI(); saveGame();
     }
 
     function toggleAuto() {
-        state.auto = !state.auto;
-        document.getElementById('btnAuto').innerText = `자동: ${state.auto ? 'ON' : 'OFF'}`;
-        if (state.auto) autoLoop();
+        state.auto = !state.auto; updateUI();
+        if(state.auto) autoLoop();
     }
+    function autoLoop() { if(state.auto) { handleEnhance(); setTimeout(autoLoop, 1000); } }
 
-    function autoLoop() {
-        if (state.auto) { 
-            handleEnhance(); 
-            setTimeout(autoLoop, 1000); 
-        }
+    function startFever() {
+        state.isFever = true; addLog("🔥 피버 타임!", "var(--fever)");
+        setTimeout(() => { state.isFever = false; state.fever = 0; updateUI(); }, 10000);
     }
 
     function addLog(m, c) {
         const log = document.getElementById('logBox');
-        log.innerHTML = `<div style="color:${c || '#8b949e'}">> ${m}</div>` + log.innerHTML;
+        log.innerHTML = `<div style="color:${c || '#95a5a6'}">> ${m}</div>` + log.innerHTML;
     }
 
-    // 골드 자동 수급
-    setInterval(() => { state.gold += (5 + state.level * 2); updateUI(); }, 1000);
-    updateUI();
+    setInterval(() => { state.gold += (2 + state.level); saveGame(); updateUI(); }, 2000);
 </script>
 </body>
 </html>
