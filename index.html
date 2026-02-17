@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>전설의 검 강화하기: 얼티밋</title>
+    <style>
+        :root {
+            --primary: #f1c40f;
+            --secondary: #e67e22;
+            --danger: #e74c3c;
+            --success: #2ecc71;
+            --bg: #1a1a2e;
+        }
+
+        body {
+            margin: 0; padding: 0; font-family: 'Pretendard', sans-serif;
+            background: var(--bg); color: white;
+            display: flex; justify-content: center; align-items: center; min-height: 100vh;
+            touch-action: manipulation; /* 모바일 더블탭 방지 */
+        }
+
+        .game-wrapper {
+            width: 90%; max-width: 450px; background: #16213e;
+            padding: 20px; border-radius: 20px; box-shadow: 0 0 50px rgba(0,0,0,0.8);
+            border: 2px solid #0f3460; text-align: center;
+        }
+
+        /* 상단 자원 바 */
+        .resource-bar {
+            display: flex; justify-content: space-around; background: #0f3460;
+            padding: 10px; border-radius: 10px; margin-bottom: 20px; font-weight: bold;
+        }
+
+        /* 메인 아이템 영역 */
+        .item-card {
+            padding: 40px 20px; background: radial-gradient(circle, #1f4068 0%, #16213e 100%);
+            border-radius: 15px; margin-bottom: 20px; position: relative;
+            transition: transform 0.1s;
+        }
+
+        .item-name { font-size: 1.8rem; margin: 10px 0; color: var(--primary); font-weight: 800; }
+        .item-stat { font-size: 0.9rem; color: #95a5a6; }
+
+        /* 확률 및 비용 정보 */
+        .info-panel { margin-bottom: 20px; font-size: 0.95rem; }
+        .cost-text { color: #bdc3c7; }
+
+        /* 버튼 및 액션 */
+        button {
+            width: 100%; padding: 18px; border: none; border-radius: 10px;
+            font-size: 1.2rem; font-weight: bold; cursor: pointer;
+            background: linear-gradient(to bottom, var(--secondary), #d35400);
+            color: white; box-shadow: 0 5px 0 #a04000; transition: 0.1s;
+        }
+
+        button:active { transform: translateY(4px); box-shadow: 0 1px 0 #a04000; }
+        button:disabled { background: #7f8c8d; box-shadow: 0 5px 0 #2c3e50; opacity: 0.6; }
+
+        /* 로그 */
+        .log-container {
+            height: 120px; overflow-y: auto; background: #1a1a2e;
+            margin-top: 20px; border-radius: 8px; padding: 10px;
+            font-size: 0.85rem; text-align: left; border: 1px solid #0f3460;
+        }
+
+        /* 애니메이션 효과 */
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            20% { transform: translate(-3px, 0px) rotate(-1deg); }
+            40% { transform: translate(3px, 2px) rotate(1deg); }
+            100% { transform: translate(1px, -1px) rotate(0deg); }
+        }
+        .shake { animation: shake 0.3s linear; }
+    </style>
+</head>
+<body>
+
+<div class="game-wrapper">
+    <div class="resource-bar">
+        <span>💰 <span id="gold">1000</span></span>
+        <span>💎 <span id="stone">5</span></span>
+    </div>
+
+    <div id="itemCard" class="item-card">
+        <div class="item-stat" id="rarity">COMMON</div>
+        <div class="item-name" id="itemName">빛바랜 연습용 검 (+0)</div>
+        <div class="item-stat" id="damage">공격력: 10</div>
+    </div>
+
+    <div class="info-panel">
+        <div>성공 확률: <span id="prob">100</span>%</div>
+        <div class="cost-text">필요 비용: <span id="costGold">100</span>G, <span id="costStone">1</span>💎</div>
+    </div>
+
+    <button id="enhanceBtn" onclick="tryEnhance()">강화 시도</button>
+
+    <div class="log-container" id="gameLog">
+        <div>대장장이가 당신을 기다립니다.</div>
+    </div>
+</div>
+
+<script>
+    // 게임 데이터
+    let state = {
+        level: 0,
+        gold: 1000,
+        stone: 10,
+        baseDamage: 10
+    };
+
+    // 사운드 객체 (브라우저 정책상 첫 클릭 후 활성화)
+    const sounds = {
+        success: new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg'),
+        fail: new Audio('https://actions.google.com/sounds/v1/water/big_splash.ogg'),
+        break: new Audio('https://actions.google.com/sounds/v1/impact/metal_clutter.ogg')
+    };
+
+    // 자동 수급 시스템 (재미를 위해)
+    setInterval(() => {
+        state.gold += 5;
+        state.stone += (Math.random() > 0.9) ? 1 : 0;
+        updateUI();
+    }, 2000);
+
+    function getProb(lvl) {
+        if (lvl < 3) return 100;
+        if (lvl < 7) return 80 - (lvl * 5);
+        if (lvl < 10) return 40 - (lvl * 2);
+        return 5;
+    }
+
+    function getCosts(lvl) {
+        return {
+            gold: 100 + (lvl * 150),
+            stone: 1 + Math.floor(lvl / 5)
+        };
+    }
+
+    function tryEnhance() {
+        const costs = getCosts(state.level);
+        if (state.gold < costs.gold || state.stone < costs.stone) {
+            addLog("재료가 부족합니다!");
+            return;
+        }
+
+        // 비용 차감
+        state.gold -= costs.gold;
+        state.stone -= costs.stone;
+
+        const roll = Math.random() * 100;
+        const prob = getProb(state.level);
+        const card = document.getElementById('itemCard');
+
+        if (roll <= prob) {
+            // 성공
+            state.level++;
+            sounds.success.play();
+            addLog(`<span style="color:#2ecc71">강화 성공! (+${state.level})</span>`);
+            animateCard('shake');
+        } else {
+            // 실패 로직
+            if (state.level >= 10) { // 10강부터 파괴 위험
+                if (Math.random() < 0.3) {
+                    state.level = 0;
+                    sounds.break.play();
+                    addLog(`<span style="color:#e74c3c">앗! 아이템이 파괴되었습니다! (+0부터 재시작)</span>`);
+                } else {
+                    state.level = Math.max(0, state.level - 1);
+                    sounds.fail.play();
+                    addLog("실패로 강화 수치가 하락했습니다.");
+                }
+            } else {
+                sounds.fail.play();
+                addLog("강화에 실패했지만 다행히 변화는 없습니다.");
+            }
+        }
+        updateUI();
+    }
+
+    function updateUI() {
+        document.getElementById('gold').innerText = Math.floor(state.gold);
+        document.getElementById('stone').innerText = state.stone;
+        
+        const costs = getCosts(state.level);
+        document.getElementById('costGold').innerText = costs.gold;
+        document.getElementById('costStone').innerText = costs.stone;
+        
+        document.getElementById('prob').innerText = getProb(state.level);
+        
+        const itemName = state.level >= 10 ? "🔥 전설의 드래곤 슬레이어" : "빛바랜 연습용 검";
+        document.getElementById('itemName').innerText = `${itemName} (+${state.level})`;
+        document.getElementById('damage').innerText = `공격력: ${state.baseDamage + (state.level * 15)}`;
+        
+        const rarity = state.level < 5 ? "COMMON" : state.level < 10 ? "RARE" : "LEGENDARY";
+        document.getElementById('rarity').innerText = rarity;
+        document.getElementById('rarity').style.color = rarity === "LEGENDARY" ? "#f1c40f" : "#95a5a6";
+    }
+
+    function addLog(msg) {
+        const log = document.getElementById('gameLog');
+        const div = document.createElement('div');
+        div.innerHTML = `> ${msg}`;
+        log.prepend(div);
+    }
+
+    function animateCard(className) {
+        const card = document.getElementById('itemCard');
+        card.classList.add(className);
+        setTimeout(() => card.classList.remove(className), 300);
+    }
+</script>
+
+</body>
+</html>
